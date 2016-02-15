@@ -1,1 +1,1 @@
-web: python dealscraper/rando-film.py
+web: python rando-film.py
