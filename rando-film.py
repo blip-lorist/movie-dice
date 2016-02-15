@@ -24,11 +24,15 @@ def hello_world():
         next(reader, None) # skip header
 
         for line in reader:
-            recs.append(line[0])
+            # Collect film titles and recommenders' names
+            rec = (line[0], line[2])
+            recs.append(rec)
 
     choice = random.choice(recs)
-    # send it back via json
-    return jsonify(response_type='in_channel', text=choice) 
+
+    # send it back in a slack-friendly json format
+    message = "'%s' recommended by %s" % (choice[0], choice[1])
+    return jsonify(response_type='in_channel', text=message) 
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
