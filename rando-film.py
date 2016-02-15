@@ -28,7 +28,7 @@ def hello_world():
 
     choice = random.choice(recs)
     # send it back via json
-    return jsonify(title=choice) 
+    return jsonify(response_type='in_channel', text=choice) 
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
