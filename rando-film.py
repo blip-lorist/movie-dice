@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
@@ -11,28 +11,32 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 @app.route('/rando-film/')
-def hello_world():
-    
-    # download google spreadsheet 
-    film_url = os.environ['FILM_URL']
-    urllib.urlretrieve(film_url, 'films.csv')
+def movie_dice():
+    slack_token = os.environ["SLACK_TOKEN"] 
 
-    recs = []
-    # randomly select a film
-    with open('films.csv') as film_csv:
-        reader = csv.reader(film_csv) 
-        next(reader, None) # skip header
+    if request.args['token'] and request.args['token'] == slack_token:
+        # download google spreadsheet 
+        film_url = os.environ['FILM_URL']
+        urllib.urlretrieve(film_url, 'films.csv')
 
-        for line in reader:
-            # Collect film titles and recommenders' names
-            rec = (line[0], line[2])
-            recs.append(rec)
+        recs = []
+        # randomly select a film
+        with open('films.csv') as film_csv:
+            reader = csv.reader(film_csv) 
+            next(reader, None) # skip header
 
-    choice = random.choice(recs)
+            for line in reader:
+                # Collect film titles and recommenders' names
+                rec = (line[0], line[2])
+                recs.append(rec)
 
-    # send it back in a slack-friendly json format
-    message = "'%s' recommended by %s" % (choice[0], choice[1])
-    return jsonify(response_type='in_channel', text=message) 
+        choice = random.choice(recs)
+
+        # send it back in a slack-friendly json format
+        message = "'%s' recommended by %s" % (choice[0], choice[1])
+        return jsonify(response_type='in_channel', text=message) 
+    else:
+        abort(403)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
